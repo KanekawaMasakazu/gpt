@@ -1,0 +1,28 @@
+import requests
+from bs4 import BeautifulSoup
+from PIL import ImageTk, Image
+import tkinter as tk
+
+
+def get_movie_data():
+    url = 'https://movie.douban.com/chart'
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                             'Chrome/58.0.3029.110 Safari/537.3'}
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    movies = soup.find_all('div', class_='pl2')
+    return movies
+
+
+def show_movie_details(movie):
+    new_window = tk.Toplevel(root)
+    new_window.geometry("600x600")
+    new_window.title(movie['title'])
+
+    # 获取海报图片并展示
+    img_url = movie.parent.find('div', class_='pic').find('img')['src']
+    response = requests.get(img_url, stream=True)
+    img = Image.open(response.raw).resize((200, 300))
+    poster = ImageTk.PhotoImage(img)
+    panel = tk.Label(new_window, image=poster)
+    panel.pack(pady=10)
